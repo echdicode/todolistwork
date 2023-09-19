@@ -1,13 +1,10 @@
 ﻿namespace todolistwork.Application.Repository
 {
-    public interface IUnitOfWork:IDisposable
+    public interface IUnitOfWork
     {
-        IContactRepository Contacts { get; }
-        IAdminUserRepository AdminUsers { get; }
         ITaskUserRepository TaskUsers { get; }
-        IUserAccountsRepository UserAccounts { get; }
-        IUserRepository UserAccountsRepository { get; }
-
+        IUserRepository UserRepository { get; }
+     
 
     }
 }

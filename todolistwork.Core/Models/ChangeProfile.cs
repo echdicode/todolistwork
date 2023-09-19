@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace todolistwork.Application.Service
+namespace todolistwork.Core.Models
 {
-    public class AdminUserService
+    public class ChangeProfile
     {
+        public string UserName { get; set; } 
     }
 }

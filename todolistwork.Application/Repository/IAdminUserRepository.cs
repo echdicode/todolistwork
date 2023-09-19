@@ -2,7 +2,8 @@
 
 namespace todolistwork.Application.Repository
 {
-    public interface IAdminUserRepository : IRepository<AdminUser>
+    public interface IAdminUserRepository 
     {
+ 
     }
 }

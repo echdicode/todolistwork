@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace todolistwork.Application.Service
+namespace todolistwork.Infrastructure.GoogleServer
 {
-    public class UserAccountsService
+    public class ApiGoogle
     {
-
     }
 }

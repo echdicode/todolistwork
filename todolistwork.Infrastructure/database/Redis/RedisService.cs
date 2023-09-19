@@ -1,14 +1,18 @@
 ﻿using Newtonsoft.Json;
 using StackExchange.Redis;
 using todolistwork.Application.ICache;
-using System;
 using Microsoft.Extensions.Configuration;
+using todolistwork.Core.Unit;
+using todolistwork.Core.Entities;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json.Serialization;
 
 namespace todolistwork.Infrastructure.database.Redis
 {
     public class RedisService : IRedisService
     {
-        
         private static ConnectionMultiplexer _redis = null;
 
         private static ConnectionMultiplexer[] _redisPools = new ConnectionMultiplexer[4];
@@ -17,12 +21,12 @@ namespace todolistwork.Infrastructure.database.Redis
         private static volatile int _currentRedis = 0;
         private  void ConfigureRedis()
         {
-            var address = configuration["SecretKeys:ApiKey"];
+            var address = "127.0.0.1:6379";
             ConfigurationOptions option = new ConfigurationOptions
             {
-                AbortOnConnectFail = true,
+              //  AbortOnConnectFail = true,
                 EndPoints = { address },
-                Password = configuration["SecretKeys:ApiKey"]
+              //  Password = configuration["SecretKeys:ApiKey"]
             };
             for (int i = 0; i < _redisPools.Length; i++)
             {
@@ -45,6 +49,68 @@ namespace todolistwork.Infrastructure.database.Redis
             }
             var redis = _redisPools[cR % _redisPools.Length];
             return redis.GetDatabase(db);
+        }
+        public async Task <IReadOnlyList<T>> GetAllDataHash<T>(string key)
+        {
+            {
+                var hashEntries = GetRedis().HashGetAll(key);
+
+                var results = hashEntries.Select(hashEntry =>
+                {
+                    var value = hashEntry.Value.ToString();
+
+                    // Chuyển đổi chuỗi JSON thành đối tượng Result
+                    var result = JsonConvert.DeserializeObject<T>(value);
+
+                    return result;
+                }).ToList();
+
+                return results.AsReadOnly();
+            }
+
+        }
+        public async Task<T?> GetDataByIdHash<T>(string key,string id)
+        {
+            {
+
+                var value = GetRedis().HashGet(key, id);
+                if (value.IsNull)
+                {
+                    return default;
+                }
+                var result = JsonConvert.DeserializeObject<T>(value);
+                return result;
+            }
+
+        }
+        public async Task<bool> SetDataHash<T>(string key,string id,  T value)
+        {
+            {
+                string data = await ResultSerialize(value);
+                bool iSet =  GetRedis().HashSet(key, id, data);
+                return iSet;
+            }
+
+        }
+        public async Task SetAllDataHash<T>(string key, IReadOnlyList<T> list)
+        {
+            {
+                HashEntry[] hashEntries = list
+                    .Select((item, index) => new HashEntry(index.ToString(), item.ToString()))
+                    .ToArray();
+
+                GetRedis().HashSet(key, hashEntries);
+                
+            }
+
+        }
+        public async Task<bool> DeleteDataHash(string key, string id)
+        {
+            {
+                bool iSet = GetRedis().HashDelete(key, id);
+                return iSet;
+            }
+
         }
         public T GetData<T>(string key)
         {
@@ -69,6 +135,22 @@ namespace todolistwork.Infrastructure.database.Redis
                 return GetRedis().KeyDelete(key);
             }
             return false;
+        }
+        public async Task<string> ResultSerialize(object data)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                StringEscapeHandling = StringEscapeHandling.EscapeNonAscii
+            };
+            string json = JsonConvert.SerializeObject(data, settings);
+            Console.WriteLine(json);
+            Dictionary<string, object> jObject = JObject.Parse(json).ToObject<Dictionary<string, object>>();
+            return json;
+
         }
     }
 }

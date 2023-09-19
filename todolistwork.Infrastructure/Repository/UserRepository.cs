@@ -1,49 +1,113 @@
 ﻿using Dapper;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using todolistwork.Application.Repository;
 using todolistwork.Core.Entities;
+using todolistwork.Core.Models;
 using todolistwork.Infrastructure.database.Mysql;
 
+using static Dapper.SqlMapper;
 namespace todolistwork.Infrastructure.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IDbTransaction _transaction;
-        private IDbConnection _connection => _transaction.Connection;
+        private readonly IConfiguration configuration;
 
-        public UserRepository(IDbTransaction transaction)
+        public UserRepository(IConfiguration configuration)
         {
-            _transaction = transaction;
+            this.configuration = configuration;
         }
+       
+
+        public async Task<IReadOnlyList<User>> GetAllAsync()
+        {
+            try
+            {
+                using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+                {
+                    connection.Open();
+                    var results = await connection.QueryAsync<User>(UserQueries.AllUser);
+                    return results.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+        }
+
+        public async Task<User> GetByIdAsync(string id)
+        {
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var results = await connection.QuerySingleOrDefaultAsync<User>(UserQueries.UserById, new { Id = id });
+                return results;
+            }
+        }
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var results = await connection.QuerySingleOrDefaultAsync<User>(UserQueries.UserByEmail, new { Email = email });
+                return results;
+            }
+        }
+
         public async Task<string> AddAsync(User entity)
         {
-            var result = await _connection.ExecuteAsync(UserQueries.AddUser, entity);
-            return result.ToString();
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(UserQueries.AddUser, entity);
+                return result.ToString();
+            }
         }
 
-        public Task<string> DeleteAsync(long id)
+        public async Task<string> UpdateAsyncByUser(User entity)
         {
-            throw new NotImplementedException();
+
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(UserQueries.UpdateUser, entity);
+                return result.ToString();
+            }
         }
 
-        public Task<IReadOnlyList<User>> GetAllAsync()
+        public async Task<string> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(UserQueries.DeleteUser, new { Id = id  });
+                return result.ToString();
+            }
         }
 
-        public Task<User> GetByIdAsync(long id)
+   
+
+        public async Task<User> LoginUser(User entity)
         {
-            throw new NotImplementedException();
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var results = await connection.QuerySingleOrDefaultAsync<User>(UserQueries.UserLogin, entity);
+                return results;
+            }
         }
 
-        public Task<string> UpdateAsync(User entity)
+        public async Task<string> UpdatePassword(User entity)
         {
-            throw new NotImplementedException();
+            using (IDbConnection connection = new MySqlConnection(configuration.GetConnectionString("DBConnection")))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(UserQueries.UpdatePassword, entity);
+                return result.ToString();
+            }
         }
     }
 }

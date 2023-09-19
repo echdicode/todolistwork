@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using todolistwork.Core.Entities;
 
-namespace todolistwork.Application.Service.IService
+namespace todolistwork.Application.IService
 {
     public interface ITaskUserService
     {
-        Task<IReadOnlyList<TaskUser>> GetAllTaskUser();
-        Task<TaskUser> GetTaskUserById(long id);
+        Task<IReadOnlyList<TaskUser>> GetAllTaskUser(string userId);
+        Task<TaskUser> GetTaskUserById(string id, string userId);
         Task<TaskUser> AddTaskUser(TaskUser entity);
         Task<TaskUser> UpdateTaskUser(TaskUser entity);
-        Task<string> DeleteTaskUser(long id);
-        Task<IReadOnlyList<TaskUser>> GetTaskUserByNeedToDo();
+        Task<string> DeleteTaskUser(string id, string userId);
+        Task<IReadOnlyList<TaskUser>> GetTaskUserByNeedToDo(string userId);
     }
 }

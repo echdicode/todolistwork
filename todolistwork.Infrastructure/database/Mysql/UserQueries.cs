@@ -1,35 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.VisualBasic;
+
 
 namespace todolistwork.Infrastructure.database.Mysql
 {
     public static class UserQueries
     {
-        
-        public static string AddUser => @"
-        INSERT INTO User (Id, UserName, Email)
-        VALUES (@Id, @UserName, @Email);
+        public static string AddUser => @"INSERT INTO user (Id,UserName, Email,CreatedTime,UpdateTime,Password,IsSuperuser)
+                                         VALUES (@Id, @UserName,@Email,@CreatedTime,@UpdateTime,@Password,@IsSuperuser);";
+        public static string AllUser => @"SELECT * FROM user WHERE IsSuperuser =false;";
+        public static string UserLogin => @"SELECT Id,UserName,Email,IsSuperuser FROM user WHERE Email =@Email AND Password=@Password;";
 
-        INSERT INTO UserAccounts (UserId, AccountType, AccountType)
-        VALUES (@UserId, @AccountType, @AccountType);
-    ";
-        public static string UserById => "SELECT * FROM [TaskUser] (NOLOCK) WHERE [Id] = @Id";
-        public static string UpdateTaskUser =>
-           @"UPDATE [TaskUser] 
-            SET [Name]=@Name,
-                [Description]=@Description, 
-                [Status]=@Status, 
-                [Priority]=@Priority,
-                [NeedToDo]=@NeedToDo,
-                [StartTime]=@StartTime,
-                [EndTime]=@EndTime
-            WHERE [Id] = @Id";
-        public static string DeleteUser => "DELETE FROM [TaskUser] WHERE [Id] = @Id";
+        public static string UserById => @"SELECT Id,UserName,Email,IsSuperuser FROM user WHERE Id = @Id;";
+        public static string UserByEmail => @"SELECT * FROM user WHERE Email = @Email;";
+        public static string UpdateUser => @"UPDATE user SET UserName = @UserName WHERE Id = @Id;";
+        public static string UpdatePassword => @"UPDATE user SET Password = @Password WHERE Id = @Id;";
 
-        public static string AllUser => "SELECT * FROM [TaskUser] (NOLOCK)";
+        public static string DeleteUser => "DELETE FROM user WHERE Id = @Id";
 
     }
 }

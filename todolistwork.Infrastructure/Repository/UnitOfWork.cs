@@ -14,44 +14,22 @@ namespace todolistwork.Infrastructure.Repository
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly IDbConnection _connection;
-        private readonly IDbTransaction _transaction;
-
-        private readonly IConfiguration configuration;
-
-
-        public IContactRepository Contacts { get; set; }
-
-        public IAdminUserRepository AdminUsers { get; set; }
+        /*  public UnitOfWork(ITaskUserRepository TaskUsers, IUserRepository UserRepository, IAdminUserRepository AdminUsers)
+          {
+              this.TaskUsers = TaskUsers;
+              this.UserRepository = UserRepository;
+              this.AdminUsers = AdminUsers;
+          }*/
+        public UnitOfWork(ITaskUserRepository TaskUsers, IUserRepository UserRepository)
+        {
+            this.TaskUsers = TaskUsers;
+            this.UserRepository = UserRepository;
+   
+        }
 
 
         public ITaskUserRepository TaskUsers { get; set; }
 
-
-        public IUserAccountsRepository UserAccounts { get; set; }
-
-        public IUserRepository UserAccountsRepository { get; set; }
-        public UnitOfWork(IConfiguration configuration)
-        {
-            this.configuration = configuration;
-            _connection = new MySqlConnection(configuration.GetConnectionString("DBConnection"));
-            _connection.Open();
-            _transaction = _connection.BeginTransaction();
-        }
-        public void Dispose()
-        {
-            _transaction.Dispose();
-            _connection.Dispose();
-        }
-
-        public void Commit()
-        {
-            _transaction.Commit();
-        }
-
-        public void Rollback()
-        {
-            _transaction.Rollback();
-        }
+        public IUserRepository UserRepository { get; set; }   
     }
 }

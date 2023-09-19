@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace todolistwork.Application.ICache
+namespace todolistwork.Core.Models
 {
-    internal interface IUserRedis
+    public class ResetPasswordBody
     {
+        public string Email { get; set; }
     }
 }
